@@ -1,4 +1,4 @@
-package scala.concurrency
+package concurrency
 
 import monix.execution.Cancelable
 import monix.reactive.Observable

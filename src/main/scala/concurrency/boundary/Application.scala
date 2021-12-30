@@ -1,10 +1,9 @@
-package scala.concurrency
+package concurrency.boundary
 
-import monix.execution.Cancelable
+import monix.eval.Task
 import monix.execution.ExecutionModel.AlwaysAsyncExecution
+import monix.execution.{Cancelable, Scheduler}
 import monix.reactive.Observable
-import monix.execution.Scheduler
-
 
 object Application {
   def main(args: Array[String]): Unit = {
@@ -16,7 +15,8 @@ object Application {
 
     val cancellable: Cancelable = observable
       .map(mapper)
-      .map(mapper)
+      .executeAsync
+      .mapEval(mapperEval)
       .subscribeOn(ioScheduler)
       .subscribe()(ioScheduler)
 
@@ -25,8 +25,16 @@ object Application {
 
   private def mapper(i: Any): String = {
     val output = s"x$i"
-    println(s"Thread-${Thread.currentThread().getName}. input: $i, output: $output")
+    println(
+      s"Thread-${Thread.currentThread().getName}. input: $i, output: $output"
+    )
     output
   }
-}
 
+  private def mapperEval(i: Any): Task[String] = {
+    Task.evalAsync {
+      println(s"Thread-${Thread.currentThread().getName}. $i - running async")
+      s"$i - running async"
+    }
+  }
+}
