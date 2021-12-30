@@ -3,21 +3,27 @@ package concurrency.mdc
 import org.log4s.MDC
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-object LocalExample extends App  {
+object ExampleWrongLog4s extends App {
   private val logger = org.log4s.getLogger
-  implicit val ec: ExecutionContextExecutor = ExecutionContext.global
+  implicit val ec: ExecutionContext = ExecutionContext.global
+  private val requestIdKey = "requestId"
 
   def req(requestId: String, userName: String): Future[Unit] = Future {
-    MDC.put("requestId", requestId)
-    logger.info(s"Received a request to create a user $userName")
+    MDC.put(requestIdKey, requestId)
+    logger.info(
+      s"Request ${MDC.get(requestIdKey)}: Received a request to create a user $userName"
+    )
     // more flatmaps to add async boundaries
-  }.flatMap(_ => Future(()).flatMap(_ => Future())).flatMap(_ => registerUser(userName))
+  }.flatMap(_ => Future(()).flatMap(_ => Future()))
+    .flatMap(_ => registerUser(userName))
 
   def registerUser(name: String): Future[Unit] = Future {
     // business logic
-    logger.info(s"Registering a new user named $name")
+    logger.info(
+      s"Request ${MDC.get(requestIdKey)}: Registering a new user named $name"
+    )
   }
 
   val requests = List(req("1", "Clark"), req("2", "Bruce"), req("3", "Diana"))
