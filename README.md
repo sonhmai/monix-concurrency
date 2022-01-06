@@ -22,3 +22,12 @@ How does ThreadLocal maintain a copy of variables for each thread?
    - there is no standard way to describe observers that will produce a final result.
    - Subscriber is a data type that’s an Observer with a Scheduler attached because in order to do anything with an Observer, we always need a Scheduler
    
+- What are the Observable APIs that we can use Observer and Subscriber on?
+
+# Sinks
+
+1. An observer can subscribe to at most one observable and cannot subscribe to multiple observables.
+2. Observer (and Subscriber) instances are stateful. For example, an Observer sum all the Ints
+in the stream and produce a Long, it must maintain a private var as state of the sum.
+3. Consumer = factory(Subscriber + attached callback)
+4. 
